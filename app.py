@@ -16,7 +16,7 @@ st.set_page_config(
     page_title="AoE2: DE - How many games to be a pro?",
     page_icon="🏆",
     layout="centered",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="auto",
 )
 
 hide_streamlit_style = """
