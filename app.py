@@ -10,6 +10,23 @@ import seaborn as sns
 
 sns.set_theme()
 
+st.set_page_config(
+    page_title="AoE2: DE - How many games to be a pro?",
+    page_icon="🏆",
+    layout="centered",
+    initial_sidebar_state="expanded",
+)
+
+
+hide_streamlit_style = """
+<style>
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+</style>
+
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
+
 # create a difference transform of the dataset
 def difference(dataset):
 	diff = list()
@@ -92,95 +109,108 @@ def train_model(df, N, desired_elo):
 
     return count_games, predicted_data
 
-st.title('AoE2: DE - How many games to be a pro?')
 
-username = st.text_input('Insert your username of AoE2:DE', 'Ivanrs297')
+st.title('AoE2: DE - How many games to be a PRO?')
+st.sidebar.title('AoE2: DE - How many games to be a PRO?')
 
-profile_info_1v1, profile_info_TM = get_player_info(username)
-
-if len(profile_info_TM['leaderboard']) > 0:
-
-    profile_id = profile_info_1v1['leaderboard'][0]['profile_id']
-    name = profile_info_1v1['leaderboard'][0]['name']
-    elo_1v1 = profile_info_1v1['leaderboard'][0]['rating']
-    elo_TM = profile_info_TM['leaderboard'][0]['rating']
-
-    st.header(f'Hi {name}!')
-    st.subheader(f'Your ELO 1 vs 1 is **{elo_1v1}**')
-
-    df_rating_1v1 = get_player_rating_history(profile_id, 3)
-    df_rating_TM = get_player_rating_history(profile_id, 4)
-
-    st.write("""#### 1 vs 1 -  Game History""")
-    rating_1v1 = pd.DataFrame()
-    rating_1v1['1 vs 1 Rating'] = df_rating_1v1['rating'].values[::-1]
-    fig, ax = plt.subplots(figsize=(10, 5))
-    ax.plot(rating_1v1)
-    plt.ylabel('ELO')
-    plt.xlabel('# Game')
-    st.pyplot(fig)
-
-    st.subheader(f'Your ELO TM is **{elo_TM}**')
-    st.write("""#### Team Match -  Game History""")
-    rating_TM = pd.DataFrame()
-    rating_TM['TM Rating'] = df_rating_TM['rating'].values[::-1]
-
-    fig, ax = plt.subplots(figsize=(10, 5))
-    ax.plot(rating_TM)
-    plt.ylabel('ELO')
-    plt.xlabel('# Game')
-    st.pyplot(fig)
+st.sidebar.header("Insert your username")
+username = st.sidebar.text_input('Insert your username of AoE2:DE', '')
 
 
-    st.write("""
-        # What is your desired ELO?
-    """)
+with st.spinner('Retrieving data...'):
 
-    desired_elo = st.slider('Select desired ELO', 900, 2800, 2000)
+    if username != '':
+        profile_info_1v1, profile_info_TM = get_player_info(username)
 
-
-    N = 1000
-
-    # 1 vs 1 Results
-    st.write("""
-        ## 1 vs 1
-        """)
-    count_1v1, pred_1v1 = train_model(df_rating_1v1, N, desired_elo)
-    if count_1v1 >= N:
-        st.write("You need more than 1000 games, noob.")
-    else:
-        st.write("Total games to be a pro: ", count_1v1)
-
-    # TM Results
-    st.write("""
-    ## Team Match
-    """)
         
-    count_TM, pred_TM = train_model(df_rating_TM, N, desired_elo)
-    if count_TM >= N:
-        st.write("You need more than 1000 games, noob.")
-    else:
-        st.write("Total games to be a pro: ", count_TM)
+
+        if len(profile_info_TM['leaderboard']) > 0 and len(profile_info_1v1['leaderboard']) > 0:
+            # st.success("User found")
+            profile_id = profile_info_1v1['leaderboard'][0]['profile_id']
+            name = profile_info_1v1['leaderboard'][0]['name']
+            elo_1v1 = profile_info_1v1['leaderboard'][0]['rating']
+            elo_TM = profile_info_TM['leaderboard'][0]['rating']
+
+            st.header(f'Hi {name}!')
+            # st.subheader(f'Your ELO 1 vs 1 is **{elo_1v1}**')
+            st.info(f'Your ELO 1 vs 1 is **{elo_1v1}**')
+
+            df_rating_1v1 = get_player_rating_history(profile_id, 3)
+            df_rating_TM = get_player_rating_history(profile_id, 4)
+
+            st.write("""#### 1 vs 1 -  Game History""")
+            rating_1v1 = pd.DataFrame()
+            rating_1v1['1 vs 1 Rating'] = df_rating_1v1['rating'].values[::-1]
+            fig, ax = plt.subplots(figsize=(10, 5))
+            ax.plot(rating_1v1)
+            plt.ylabel('ELO')
+            plt.xlabel('# Game')
+            st.pyplot(fig)
+
+            # st.subheader(f'Your ELO TM is **{elo_TM}**')
+            st.info(f'Your ELO TM is **{elo_TM}**')
+
+            st.write("""#### Team Match -  Game History""")
+            rating_TM = pd.DataFrame()
+            rating_TM['TM Rating'] = df_rating_TM['rating'].values[::-1]
+
+            fig, ax = plt.subplots(figsize=(10, 5))
+            ax.plot(rating_TM)
+            plt.ylabel('ELO')
+            plt.xlabel('# Game')
+            st.pyplot(fig)
 
 
-    st.write("""
-    ## Expected Win Rate
-    According to your past games.
-    """)
-        
-    fig, ax = plt.subplots(figsize=(10, 5))
-    ax.plot(pred_TM, label ="TM")
-    ax.plot(pred_1v1, label ="1vs1")
-    plt.ylabel('ELO')
-    plt.xlabel('# Game')
-    ax.legend()
-    st.pyplot(fig)
-
-else:
-    st.write("""
-        ## Error. User not found.
-    """)
+            st.write("""
+                # What is your desired ELO?
+            """)
+            st.sidebar.header('What is your desired ELO?')
+            desired_elo = st.sidebar.slider('Select desired ELO', 900, 2800, 2000)
 
 
-st.write("Created by IvanR - Using API from [AoE2.net](https://aoe2.net/)")
+            N = 1000
+
+            # 1 vs 1 Results
+            st.write("""
+                ## 1 vs 1
+                """)
+            count_1v1, pred_1v1 = train_model(df_rating_1v1, N, desired_elo)
+            if count_1v1 >= N:
+                # st.write("You need more than 1000 games, noob.")
+                st.warning('You need more than 1000 games, noob.')
+            else:
+                # st.write("Total games to be a PRO: ", count_1v1)
+                st.success(f"Total games to be a PRO: {count_1v1}")
+
+
+            # TM Results
+            st.write("""
+            ## Team Match
+            """)
+                
+            count_TM, pred_TM = train_model(df_rating_TM, N, desired_elo)
+            if count_TM >= N:
+                # st.write("You need more than 1000 games, noob.")
+                st.warning('You need more than 1000 games, noob.')
+            else:
+                # st.write("Total games to be a PRO: ", count_TM)
+                st.success(f"Total games to be a PRO: {count_TM}")
+
+
+            st.write("""
+            ## Expected Win Rate
+            According to your past games.
+            """)
+                
+            fig, ax = plt.subplots(figsize=(10, 5))
+            ax.plot(pred_TM, label ="TM")
+            ax.plot(pred_1v1, label ="1vs1")
+            plt.ylabel('ELO')
+            plt.xlabel('# Game')
+            ax.legend()
+            st.pyplot(fig)
+            st.write("Created by IvanR - Using API from [AoE2.net](https://aoe2.net/)")
+
+        else:
+            st.error('Error. User not found')
 
