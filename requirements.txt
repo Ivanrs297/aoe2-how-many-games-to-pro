@@ -1,0 +1,8 @@
+seaborn==0.11.0
+streamlit==0.74.1
+numpy==1.18.5
+matplotlib==3.3.3
+requests==2.25.0
+statsmodels==0.12.1
+pandas==1.1.4
+scikit_learn==0.24.0
