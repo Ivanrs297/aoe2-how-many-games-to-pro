@@ -8,6 +8,8 @@ from sklearn.metrics import mean_squared_error
 import numpy
 import seaborn as sns
 
+# heroku ps:scale web=1 
+
 sns.set_theme()
 
 st.set_page_config(
@@ -16,7 +18,6 @@ st.set_page_config(
     layout="centered",
     initial_sidebar_state="expanded",
 )
-
 
 hide_streamlit_style = """
 <style>
@@ -110,11 +111,15 @@ def train_model(df, N, desired_elo):
     return count_games, predicted_data
 
 
-st.title('AoE2: DE - How many games to be a PRO?')
-st.sidebar.title('AoE2: DE - How many games to be a PRO?')
+st.title('🏆 AoE2: DE - How many games you need to play to be a PRO?')
+st.write("""
+    A machine learning  app 🤖 to predict how many games you need to reach a certain ELO given the results of your past matches.
+    \n👈 Insert your username to start.
+""")
+st.sidebar.title('How many games you need to play to be a PRO?')
 
 st.sidebar.header("Insert your username")
-username = st.sidebar.text_input('Insert your username of AoE2:DE', '')
+username = st.sidebar.text_input('Insert your username of AoE2:DE (i.e. "TheViper")', '')
 
 
 with st.spinner('Retrieving data...'):
@@ -131,7 +136,7 @@ with st.spinner('Retrieving data...'):
             elo_1v1 = profile_info_1v1['leaderboard'][0]['rating']
             elo_TM = profile_info_TM['leaderboard'][0]['rating']
 
-            st.header(f'Hi {name}!')
+            st.header(f'Hi {name}! 👋')
             # st.subheader(f'Your ELO 1 vs 1 is **{elo_1v1}**')
             st.info(f'Your ELO 1 vs 1 is **{elo_1v1}**')
 
@@ -162,7 +167,7 @@ with st.spinner('Retrieving data...'):
 
 
             st.write("""
-                # What is your desired ELO?
+                # You need the following matches
             """)
             st.sidebar.header('What is your desired ELO?')
             desired_elo = st.sidebar.slider('Select desired ELO', 900, 2800, 2000)
@@ -177,10 +182,10 @@ with st.spinner('Retrieving data...'):
             count_1v1, pred_1v1 = train_model(df_rating_1v1, N, desired_elo)
             if count_1v1 >= N:
                 # st.write("You need more than 1000 games, noob.")
-                st.warning('You need more than 1000 games, noob.')
+                st.warning('You need more than 1000 matches, noob 😢')
             else:
-                # st.write("Total games to be a PRO: ", count_1v1)
-                st.success(f"Total games to be a PRO: {count_1v1}")
+                # st.write("Total matches to be a PRO: ", count_1v1)
+                st.success(f"Total matches to be a PRO: {count_1v1} ✅")
 
 
             # TM Results
@@ -190,16 +195,16 @@ with st.spinner('Retrieving data...'):
                 
             count_TM, pred_TM = train_model(df_rating_TM, N, desired_elo)
             if count_TM >= N:
-                # st.write("You need more than 1000 games, noob.")
-                st.warning('You need more than 1000 games, noob.')
+                # st.write("You need more than 1000 matches, noob.")
+                st.warning('You need more than 1000 matches, noob 😢')
             else:
-                # st.write("Total games to be a PRO: ", count_TM)
-                st.success(f"Total games to be a PRO: {count_TM}")
+                # st.write("Total matches to be a PRO: ", count_TM)
+                st.success(f"Total matches to be a PRO: {count_TM} ✅")
 
 
             st.write("""
             ## Expected Win Rate
-            According to your past games.
+            According to your past matches.
             """)
                 
             fig, ax = plt.subplots(figsize=(10, 5))
